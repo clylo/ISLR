@@ -1,0 +1,193 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+```{r}
+
+library(ISLR)
+data("Auto")
+head(Auto)
+dim(Auto)
+names(Auto)
+
+```
+
+
+
+```{r}
+plot(Auto$cylinders,Auto$mpg)
+
+```
+```{r}
+plot(cylinders , mpg)
+plot(cylinders , mpg , col ="red ")
+plot(cylinders , mpg , col ="red", varwidth =T)
+plot(cylinders , mpg , col ="red", varwidth =T,horizontal =T)
+plot(cylinders , mpg , col ="red", varwidth =T, xlab=" cylinders ",ylab ="MPG ")
+```
+```{r}
+hist(mpg,col=3,breaks=15)
+```
+```{r}
+pairs(Auto)
+```
+```{r}
+summary(mpg)
+```
+
+```{r}
+
+```
+
+Conceptual
+1.
+a)flexible >inflexible, when n is large and p is small should be easier to fit flexible model  with more data and fewer degrees of freedom
+b)flexible<inflexible, high degrees of freedom and low n makes it easy for flexible methods to overfit
+c)flexible>inflexible, flexible method has lower bias for non linear trends than linear
+d)flexible<inflexible, likely that the inflexible method overfits to compensate for errors
+
+2. n= observations, p = predictors
+regress = quant output
+classif = qualit output
+infer = relationship
+prediction = future guess
+a)regression, inference, n = 500 firms, p = profit,employees,industry,salary
+b)classif, prediction, n =20 prod, p =S/F, price, budget, comp price and etc.
+c)regression,prediction,n=weekly data 2012, %changes in all listed markets
+
+3.
+a)MS paint up in this bitch,
+b)bias -
+var -
+train err - 
+test err -
+bayes err -
+
+4.
+a)student pass/fail, p: test scores, studying time
+email spam/not spam, p: email name, title, size
+tumour identification, p: size, shape, texture
+b)sales forecast, p= historical sales
+height of children, p =parents height
+speed of car, p = size of engine
+c)
+market segmentation, p = customer demographics
+biological families, p = plant leaf, stem, colour characteristics
+shopping baskets, p = time of day, product category, other products purchased
+
+5.adv for a flexible approach, is that it can fit non linear responses better. disadv is that it needs more features or parameters to fit.
+
+and vice versa.
+
+A more fleixble app should be prefered when you have a lot of data and a lot of features and want to get the best prediction. Less flexible app is best when you have less of both and want to be able to interpret the response of the model.
+
+6. diff is parametric app makes aassumptions about the form of f, where non param does not. similar to above, non param is best when you have a high n val to use to estim form of f. downside is difficult to intrepret and can also overfit. 
+
+7. euc dist = sqrt(x1^2 +...+xn^2)
+a)obs 1 = 3, 2 = 2, 3 = 3.2, 4=2.2, 5 = 1.4, 6= 1.7 respectively
+b)green, obs 5 = 1.4, 1.4 - 1, closest to k val
+c)red
+d)non linear bayes, best value should be low b/c the lower is k is more flexible to fit non linear responses
+
+8.
+
+```{r}
+# a)
+
+college <- read.csv("C:/Users/lochr/Desktop/ISLR/College.csv")
+
+```
+
+
+```{r}
+
+rownames(college) = college[,1]
+fix(college)
+
+```
+
+
+```{r}
+college=college[,-1]
+fix(college)
+```
+
+```{r}
+college
+```
+
+
+```{r}
+summary(college)
+```
+```{r}
+pairs(college[,1:10])
+```
+```{r}
+plot(college$Private,college$Outstate)
+```
+
+```{r}
+elite = rep("No",nrow(college))
+elite[college$Top10perc>50]="Yes"
+elite=as.factor(elite)
+college=data.frame(college,elite)
+
+```
+
+
+```{r}
+summary(college)
+```
+
+```{r}
+plot(college$elite,college$Outstate)
+```
+ 
+```{r}
+par(mfrow=c(2,2))
+hist(college$Apps)
+hist(college$perc.alumni, col=2)
+hist(college$S.F.Ratio, col=3, breaks=10)
+hist(college$Expend, breaks=100)
+```
+
+```{r}
+
+auto <-read.csv("C:/Users/lochr/Desktop/ISLR/Auto.csv",header=T,na.strings="?")
+
+auto=na.omit(auto)
+dim(auto)
+
+summary(auto)
+
+```
+ 
+ 
+ 9a)
+ quant p = mpg, cylin, disp. hp, weight, acce
+ qual p = name, origin, yr
+```{r}
+auto
+```
+ 
+ 
+```{r}
+library("dplyr")
+
+id = 1:7
+auto = mutate_at(auto, funs(as.numeric), id)
+
+sapply(auto[, 1:7], range)
+```
+ 
+ 

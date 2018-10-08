@@ -1,0 +1,422 @@
+---
+title: "ISLR CH3 EX"
+output: html_document
+---
+```{r}
+library(MASS)
+library(ISLR)
+
+
+fix(Boston)
+names(Boston)
+```
+```{r}
+attach(Boston)
+lm.fit=lm(medv~lstat)
+summary(lm.fit)
+```
+```{r}
+names(lm.fit)
+coef(lm.fit)
+confint(lm.fit)
+```
+```{r}
+predict(lm.fit,data.frame(lstat=c(5,10,15)),interval = "confidence")
+predict(lm.fit,data.frame(lstat=c(5,10,15)),interval = "prediction")
+
+```
+```{r}
+plot(lstat,medv)
+abline(lm.fit)
+abline (lm.fit ,lwd =3)
+abline (lm.fit ,lwd =3, col ="red ")
+plot(lstat ,medv ,col ="red ")
+plot(lstat ,medv ,pch =20)
+plot(lstat ,medv ,pch ="+")
+plot (1:20 ,1:20, pch =1:20)
+```
+
+1. Null  hyp is that none of the media have any effect on the sales. P val of tv and radio media are <.05, thus stat significant, while newspaper is not. The p value suggests that tv and radio influence response of sales, thus we reject the null hyp.
+
+2. KNN classifier is qualitative for predicting output y while KNN regression is for quantative for f(x)
+
+3. 
+y = 50+20(gpa)+.07(iq)+35(gender)+.01(gpa)(iq)-10(gpa)(gender)
+
+male:
+y = 50+20(x1)+.07(x2)+.01(x1)(x2)
+female:
+y = 50+20(x1)+.07(x2)+35+.01(x1)(x2)-10(x1)
+y = 50+10(x1)+.07(x2)+35+.01(x1)(x2)
+
+III, once past certain gpa males are gucci
+
+b.
+female x1 = 110, gpa =4, thus y=137.1
+
+c. false, with multiple interactions we can't just check correlations we need VIF
+
+4.
+a. I would expect RSS to be lower for the linear reg, though i think its hard to tell! the form of the cubic function could be shallow and flat and might fit better  actually.
+
+b. same as a, cubic function could overfit and be better but hard to tell
+
+c. in this case, i would expect RSS to be lower for cubic function, polynomial regression is more flexible and trades bias for variance, thus the function should overfit to training data
+
+d. dont really know, probably same as c?
+
+5.
+
+6.
+for lin reg, least squares line always pass thru mean of x, mean of y.
+3.4 says Bo= avg y - B1(avg x)
+when a point is on a eqn of a line, avg y = Bo + B1(avg x),
+we can use eqn from 3.4 into our eqn
+avg y = avg y - B1(avg x) + B1(avg x)
+thus both sides are equal and true
+
+7.
+From 3.4 we know eqn for B1, and from 3.17 we know eqn for R squared, assume x and y = 0
+
+
+So ... i need to learn how to write eqn in r md ...
+
+8.
+
+```{r}
+
+library(ISLR)
+
+data(Auto)
+fit<-lm(mpg ~ horsepower, data =Auto)
+summary(fit)
+
+```
+i. p val is stat signif so looks like mpg is a good predictor
+ii. relationship is p strong, looking at R squared, this predictor explains 60% of response
+iii. relationship is negative
+iv. y = 39.9 - .15(98) 
+```{r}
+predict(fit,data.frame(horsepower=98),interval = "confidence")
+predict(fit,data.frame(horsepower=98),interval = "prediction")
+```
+
+b.
+```{r}
+plot(horsepower,mpg, col="blue", main="scatterplot")
+abline(fit, col="red")
+```
+```{r}
+par(mfrow=c(2,2))
+plot(fit)
+```
+The residuals vs fitted doesnt look completely horizontal which suggests to me that maybe the form of f is not linear
+
+9.
+a.
+```{r}
+plot(Auto)
+```
+
+b.
+```{r}
+cor(Auto[1:8])
+```
+c.
+```{r}
+fit<-lm(mpg~cylinders+displacement+horsepower+weight+acceleration+year+origin)
+summary(fit)
+```
+i. There seems to be a relationship between predictors and response as the F stat is greater then 1
+ii. displacement, weight, year, origin
+iii. .75 suggests that newer cars have better mileage
+
+d.
+```{r}
+par(mfrow=c(2,2))
+plot(fit)
+```
+
+From RvF, slight curve, thus maybe not linear form
+
+```{r}
+fit2<-lm(mpg~displacement*weight+displacement*year)
+summary(fit2)
+```
+Improved the R squared by a few percent. According to the p val our interactions seem signif
+f.
+```{r}
+par(mfrow = c(2, 2))
+plot(Auto$horsepower,Auto$mpg)
+plot(log(Auto$horsepower), Auto$mpg)
+plot(sqrt(Auto$horsepower), Auto$mpg)
+plot((Auto$horsepower)^2, Auto$mpg)
+
+```
+Log transform made it look most linear.
+
+10.
+a.
+```{r}
+attach(Carseats)
+fitcar<-lm(Sales ~ Price + Urban + US)
+```
+b.
+```{r}
+Carseats
+summary(fitcar)
+```
+
+Price - if price set is higher than it will lower sales
+Urban - if the store is in an urban area lower sales
+US - If Store is in US, leads to higher sales
+
+d. 
+Can reject price and US
+
+e.
+```{r}
+fit3<-lm(Sales~Price+US)
+summary(fit3)
+```
+
+f.
+Not very good, r squared on 23%
+
+g.
+```{r}
+confint(fit3)
+```
+
+h.
+```{r}
+plot(fit3)
+```
+
+
+From Resid v Lev plot, there are some points which are outliers
+
+11.
+```{r}
+set.seed(1)
+x=rnorm(100)
+y=2*x+rnorm(100)
+fit4<-lm(y~x+0)
+summary(fit4)
+```
+According to p val we should be able to reject the null hyp
+
+b.
+```{r}
+set.seed(1)
+x=rnorm(100)
+y=2*x+rnorm(100)
+fit5<-lm(y~x)
+summary(fit5)
+```
+Looks the same to me
+
+c.
+basically no difference, theyre the same line??
+
+d.
+```{r}
+n <- length(x)
+t <- sqrt(n - 1)*(x %*% y)/sqrt(sum(x^2) * sum(y^2) - (x %*% y)^2)
+as.numeric(t)
+```
+e.
+
+f.
+```{r}
+fit6<-lm(y~x)
+summary(fit6)
+fit7<-lm(x~y)
+summary(fit7)
+```
+
+12.
+  
+```{r}
+set.seed(1)
+x<-1:100
+y<-2*x + rnorm(100, sd =.1)
+fitx <- lm(x~y+0)
+fity<- lm(y~x+0)
+summary(fity)
+summary(fitx)
+```
+```{r}
+x<-1:100
+y <- 100:1
+fitx <- lm(x~y+0)
+fity<- lm(y~x+0)
+summary(fity)
+summary(fitx)
+```
+
+13.
+a.
+```{r}
+set.seed(1)
+x<-rnorm(100)
+```
+b.
+```{r}
+ep<-rnorm(100,sd=sqrt(.25))
+```
+c.
+```{r}
+y<--1+.5*x+ep
+fite<-lm(y~x)
+summary(fite)
+```
+Intercept is -1 and coeff estim is .5
+
+d.
+```{r}
+plot(x,y)
+```
+Positively correlated, linear pattern
+e. f.
+```{r}
+fit8<-lm(y~x)
+plot(x,y)
+abline(fit8, col = 'red')
+abline(-1,0.5, col='blue')
+legend("bottomright",c("hello","world"),col=c("blue","red"),lty=c(1,1))
+summary(fit8)
+```
+Pretty close but not quite -1 and .5
+
+g.
+```{r}
+set.seed(1)
+x<-rnorm(100)
+ep<-rnorm(100,sd=.69)
+y<--1+2*x+ep
+fit9<-lm(y~x)
+summary(fit9)
+plot(x,y)
+abline(fit9,col="red")
+abline(-1,.5,col="blue")
+```
+Way off after increasing the noise via changing sd
+
+h.
+```{r}
+confint(fit8)
+confint(fit9)
+```
+Intervals for the fit with more noise has wider intervals as expected
+
+14.
+```{r}
+set.seed(1)
+x1=runif(100)
+x2=0.5*x1+rnorm(100)/10
+y=2+2*x1+0.3*x2+rnorm(100)
+```
+coeff are 2 and .3
+
+b.
+```{r}
+plot(x1,x2)
+```
+correl between coeff are positive and linear ish
+
+
+c.
+```{r}
+fit10<-lm(y~x1+x2)
+summary(fit10)
+plot(fit10)
+```
+
+Estim intercept is 2.13, estim predictor coeff are 1.43 and 1.0 forx1 and x2 respectively. They are not really that close to the actuals of 2 and .3. I think you can reject the null hpy for x1 but not x2.
+
+d.
+```{r}
+fit11<-lm(y~x1)
+summary(fit11)
+plot(x1,y)
+abline(fit11,col='red')
+```
+
+We can reject null hyp
+
+e.
+```{r}
+fit12<-lm(y~x2)
+summary(fit12)
+plot(x2,y)
+abline(fit12,col='red')
+```
+
+We can reject the null hyp
+
+f.
+```{r}
+cor(x1,x2)
+```
+The two variable has high correlation so in the multi regression it was difficult to tell which variable was more siginificant. Collinearity is present in this situation.
+
+g.
+```{r}
+x1 <- c(x1, 0.1)
+x2 <- c(x2, 0.8)
+y <- c(y, 6)
+
+fit13<-lm(y~x1+x2)
+fit14<-lm(y~x1)
+fit15<-lm(y~x2)
+
+summary(fit13)
+summary(fit14)
+summary(fit15)
+```
+
+```{r}
+plot(fit13)
+plot(fit14)
+plot(fit15)
+```
+
+Skews all the coefficients upwards, definitely a high leverage point
+
+15.
+```{r}
+library(MASS)
+attach(Boston)
+```
+
+```{r}
+for (i in names(Boston)) {
+  fit.i<-lm(crim~i)
+  summary(fit.i)
+}
+```
+
+
+a.
+```{r}
+fit.zn<-lm(crim~zn)
+fit.indus<-lm(crim~indus)
+fit.nox<-lm(crim~nox)
+fit.rm<-lm(crim~rm)
+fit.age<-lm(crim~age)
+fit.chas<-lm(crim~chas)
+fit.dis<-lm(crim~dis)
+fit.rad<-lm(crim~rad)
+fit.tax<-lm(crim~tax)
+fit.ptratio<-lm(crim~ptratio)
+fit.black<-lm(crim~black)
+fit.lstat<-lm(crim~lstat)
+fit.medv<-lm(crim~medv)
+
+for (i in names(Boston)) {
+#  fit.i<-lm(crim~i)
+  summary(fit.+i)
+}
+```
+

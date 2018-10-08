@@ -1,0 +1,374 @@
+---
+title: "ISLR CH 4 EX"
+output: html_notebook
+---
+
+1.
+sub logit rep into log function to get
+
+p(x) = [p(x)/(1-p(x))]/[1+(p(x)/1-p(x))]
+
+simplify
+
+to p(x) = p(x) which proves they're the same
+
+2. 3.
+Too hard to type eqns
+
+4. ????
+
+5.
+a. should perform almost the same, LDA is better
+b. should expect QDA to be better on non linear boundaries
+c. generally as sample increases should expect the QDA to perform better, less bias than linear should be flexible to sample
+d.FALSE
+
+6.
+a.
+$x_1=40$ and $x_2=3.5$
+plug all var into log regression to get
+
+.38
+```{r}
+exp(-6+.05*(40)+1*(3.5))/(1+exp(-6+.05*(40)+1*(3.5)))
+```
+b.
+Solve for
+$0.5 = \frac{e^{-6 + 0.05 X_1 + 1 \times 3.5}}{1+e^{-6+0.05 X_1 + 1 \times 3.5}}$
+$log(1)=-6+.05 x_1 +3.5$
+50
+
+7.
+Using 4.12
+prob issuing div at 4% profit is =
+
+```{r}
+(0.8*exp(-1/(2*36)*(4-10)^2))/(0.8*exp(-1/(2*36)*(4-10)^2)+(1-0.8)*exp(-1/(2*36)*(4-0)^2))
+```
+
+8.
+Probably the log reg because it is more interpretable. The KNN with low n is suspect to overfit so a train err of 2 and test err of 34 still is avg of 18. 
+
+9.
+The quantity p(X)/[1???p(X)] is called the odds, and can take on any value
+odds between 0 and ???. Values of the odds close to 0 and ??? indicate very low
+and very high probabilities of default, respectively.
+
+Ok, now then...
+.37 = p(X)/[1???p(X)]
+p(x)=27%
+
+and
+
+odds = .16/[1???.16]
+4 in 21 or .19
+
+ok now to the applied stuff
+
+10.
+a.
+```{r}
+library(ISLR)
+data(Weekly)
+summary(Weekly)
+plot(Weekly$Year,Weekly$Volume,xlab = "Year",ylab = "Volume")
+plot(Weekly$Lag1,Weekly$Lag2)
+```
+Upward trend with the volume per year and then decrease from 2008 to 2010.
+
+b.
+```{r}
+attach(Weekly)
+fitlog<-glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume,data=Weekly,family = binomial)
+summary(fitlog)
+
+```
+
+lag2 looks to be stat significant
+
+c.
+```{r}
+coef(fitlog)
+summary(fitlog)$coef
+fitprob<-predict(fitlog,type="response")
+fitprob[1:10]
+contrasts(Direction)
+dim.data.frame(Direction)
+fitpred = rep("Down",1089)
+fitpred[fitprob>0.5] = "Up"
+table(fitpred,Direction)
+(54+557)/1089
+
+```
+Makes right prediction 56% of the time, better than a coin flip i guess
+```{r}
+mean(fitpred==Direction)
+```
+training err is 1-.56 = .44
+
+d.
+```{r}
+train=(Year<2008)
+Weekly2008 =Weekly[!train,]
+Weekly2008
+Direction2008=Direction[!train]
+```
+
+```{r}
+train.yrs <- Weekly$Year %in% (1990:2008)
+train <- Weekly[train.yrs,]
+train
+test <- Weekly[!train.yrs,]
+fit2 <- glm(Direction~Lag2, data=train, family=binomial)
+fit2.prob <- predict(fit2, test, type="response")
+fit2.pred <- ifelse(fit2.prob > 0.5, "Up", "Down")
+table(fit2.pred, test$Direction)
+mean(fit2.pred==test$Direction)
+```
+
+
+```{r}
+library(MASS)
+library(ISLR)
+train.yrs<-Weekly$Year %in% (1990:2008)
+train<-Weekly[train.yrs,]
+test<-Weekly[!train.yrs,]
+fitlda<-lda(Direction~Lag2,data=train)
+fitlda
+fitlda.pred<-predict(fitlda,test)$class
+table(fitlda.pred,test$Direction)
+mean(fitlda.pred == test$Direction)
+
+```
+```{r}
+fitqda<-lda(Direction~Lag2,data=train)
+fitqda
+fitqda.pred<-predict(fitqda,test)$class
+table(fitqda.pred,test$Direction)
+mean(fitqda.pred == test$Direction)
+```
+```{r}
+library(class)
+set.seed(1)
+train.X <- as.matrix(train$Lag2)
+test.X <- as.matrix(test$Lag2)
+knn.pred <- knn(train.X, test.X, train$Direction, k=1)
+table(knn.pred, test$Direction)
+mean(knn.pred==test$Direction)
+```
+```{r}
+knn.pred <- knn(train.X, test.X, train$Direction, k=10)
+table(knn.pred, test$Direction)
+mean(knn.pred==test$Direction)
+```
+
+```{r}
+knn.pred <- knn(train.X, test.X, train$Direction, k=20)
+table(knn.pred, test$Direction)
+mean(knn.pred==test$Direction)
+```
+
+11.
+a.
+```{r}
+attach(Auto)
+```
+```{r}
+mpg01<- as.numeric(mpg > median(mpg))
+df <- data.frame(Auto,mpg01)
+```
+b.
+```{r}
+pairs(df)
+```
+```{r}
+library(ggplot2)
+```
+```{r}
+ggplot(data = df) + geom_point(mapping = aes(x=horsepower,y=weight,colour=weight))+
+  geom_smooth(mapping = aes(x=horsepower,y=weight))
+```
+
+```{r}
+p <- ggplot(mpg, aes(class, hwy))
+p + geom_boxplot()
+```
+
+c.
+```{r}
+traindf <- sample(1:nrow(df), nrow(df)*0.7 , replace=F)
+#make vector,arg is row 1 to last row, sample  to take is num of rows*.7, dont replace values
+traindf
+train <- df[traindf,]
+# test df exclude those in traindf
+test <- df[-traindf,]
+```
+d.
+```{r}
+fit.lda<-lda(mpg01~weight+displacement+acceleration,data=train)
+fit.lda.pred <- predict(fit.lda, test)$class
+table(fit.lda.pred, test$mpg01)
+mean(fit.lda.pred==test$mpg01)
+```
+e.
+```{r}
+fit.qda<-lda(mpg01~weight+displacement+acceleration,data=train)
+fit.qda.pred <- predict(fit.qda, test)$class
+table(fit.qda.pred, test$mpg01)
+mean(fit.qda.pred==test$mpg01)
+```
+f.
+```{r}
+logAuto<-glm(mpg01~weight+displacement+acceleration,data=train,family=binomial)
+summary(logAuto)
+logAuto.prob<-predict(logAuto,test,type="response")
+logAuto.pred <- ifelse(logAuto.prob > 0.5, 1, 0)
+table(logAuto.pred,test$mpg01)
+mean(logAuto.pred==test$mpg01)
+```
+g.
+```{r}
+set.seed(1)
+train.X <-cbind(train$displacement,train$weight,train$horsepower,train$acceleration)
+test.X <-cbind(test$displacement,test$weight,test$horsepower,test$acceleration)
+knn.pred <- knn(train.X, test.X, train$mpg01, k=1)
+table(knn.pred, test$mpg01)
+mean(knn.pred==test$mpg01)
+```
+```{r}
+knn.pred <- knn(train.X, test.X, train$mpg01, k=5)
+table(knn.pred, test$mpg01)
+mean(knn.pred==test$mpg01)
+```
+```{r}
+knn.pred <- knn(train.X, test.X, train$mpg01, k=10)
+table(knn.pred, test$mpg01)
+mean(knn.pred==test$mpg01)
+```
+
+12.
+a.
+```{r}
+power <-function(){
+  print(2^3)
+}
+power()
+```
+b.
+```{r}
+Power2 =function (x,a){
+  print(x^a)
+}
+Power2(2,3)
+```
+
+c.
+```{r}
+Power2(10,3)
+```
+d.
+```{r}
+Power3 =function (x,a){
+  result<-x^a
+  return(result)
+}
+Power3(2,3)
+```
+e.
+```{r}
+x<-c(1:10)
+plot(x,Power3(x,3),log="y")
+```
+
+f.
+```{r}
+Plotpower<-function(x,a){
+  plot(x,Power3(x,a))
+}
+Plotpower(1:20,3)
+```
+
+13.
+```{r}
+attach(Boston)
+pairs(Boston)
+```
+```{r}
+summary(Boston)
+```
+```{r}
+crim01 <- ifelse(Boston$crim > median(Boston$crim),1,0)
+crimdf<- data.frame(Boston,crim01)
+crimdf
+
+```
+Do Logit first
+```{r}
+sort(cor(crimdf)[1,])
+```
+```{r}
+traindf<-sample(1:nrow(crimdf),nrow(crimdf)*0.7,replace=F)
+train<-crimdf[traindf,]
+test<-crimdf[-traindf,]
+crim.fit<-glm(crim01~rad+tax+lstat+nox, family=binomial, data=train)
+crim.prob<-predict(crim.fit,test,type="response")
+crim.pred <- ifelse(crim.prob > median(crim), 1, 0)
+table(crim.pred,test$crim01)
+mean(crim.pred==test$crim01)
+
+```
+
+```{r}
+crim.fitlda<-lda(crim01~rad+tax+lstat+nox,data=train)
+crim.pred <- predict(crim.fitlda,test)$class
+table(crim.pred,test$crim01)
+mean(crim.pred==test$crim01)
+
+```
+```{r}
+crim.fitqda<-qda(crim01~rad+tax+lstat+nox,data=train)
+crim.pred <- predict(crim.fitqda,test)$class
+table(crim.pred,test$crim01)
+mean(crim.pred==test$crim01)
+```
+```{r}
+set.seed(1)
+train.X <- cbind(train$rad,train$tax,train$lstat)
+test.X <- cbind(test$rad,test$tax,test$lstat)
+knn.pred <- knn(train.X, test.X, train$crim01, k=1)
+table(knn.pred, test$crim01)
+mean(knn.pred==test$crim01)
+```
+
+Overall, KNN seems to work best, log the second and lda and qda the last and the same.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
